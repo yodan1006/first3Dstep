@@ -1,0 +1,16 @@
+{
+    "name": "Sample.Runtime",
+    "rootNamespace": "Sample.Runtime",
+    "references": [
+        "GUID:87f7d23e5aa67ea4fbe54ad9a5033447"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
