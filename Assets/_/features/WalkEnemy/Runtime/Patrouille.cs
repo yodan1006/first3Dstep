@@ -89,7 +89,7 @@ namespace WalkEnemy.Runtime
             {
                 float t = i / (float)(rayCount - 1);
                 float angle = Mathf.Lerp(-halfAngle, halfAngle, t);
-                Quaternion rotation = Quaternion.Euler(0,angle,0);
+                Quaternion rotation = Quaternion.Euler(angle,angle,0);
                 Vector3 dir = rotation * forward;
 
                 if (Physics.Raycast(origin, dir, out RaycastHit hitInfo, viewDistance , playerMask))
