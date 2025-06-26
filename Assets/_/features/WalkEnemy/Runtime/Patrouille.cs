@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 using Color = UnityEngine.Color;
 
 namespace WalkEnemy.Runtime
@@ -10,7 +11,8 @@ namespace WalkEnemy.Runtime
     {
         #region Publics
 
-        
+        public bool m_visionActive;
+        public int m_rayCountalert;
 
         #endregion
 
@@ -21,26 +23,52 @@ namespace WalkEnemy.Runtime
         {
             _agent = GetComponent<NavMeshAgent>();
             _etat = Etat.patrol;
+            alert = rayCount /2;
         }
 
         private void Update()
         {
-
-            if (rayCountalert >= alert) 
-                _etat = Etat.targeting;
-                
-            DetectPlayer();
+            if (m_visionActive)
+                DetectPlayer();
             
             switch (_etat)
             {
                  case Etat.patrol: MovePatrol(); 
                      break;
                 case Etat.search:
-                    if (targetpoint != null)
+                    if (isSearching)
                     {
-                        MoveToDetect(targetpoint.position);
-                        Debug.Log("je me deplace vers " + targetpoint.position);
-                    } 
+                        MoveToDetect(lastSeenPosition);
+
+                        float distance = Vector3.Distance(transform.position, lastSeenPosition);
+                        if (distance < _agent.stoppingDistance + 0.2f && !isWaiting)
+                        {
+                            isSearching = false;
+                            isWaiting = true;
+                            waitTimer = waitTimeAfterSearch;
+                            _agent.isStopped = true;
+                            m_rayCountalert = 0;
+                            initialYRotation = _agent.transform.rotation.eulerAngles.y;
+                            Debug.Log("Joueur perdu, retour à la patrouille");
+                        }
+                    }
+                    else if (isWaiting)
+                    {
+                            waitTimer -= Time.deltaTime;
+                            float osciliation = Mathf.Sin(Time.time * lookAroundSpeed) * lookAroundAngle;
+                            Vector3 newRotation = new Vector3(0,initialYRotation + osciliation,0);
+                            transform.eulerAngles = newRotation;
+                            if (waitTimer <= 0)
+                            {
+                                isWaiting = false;
+                                _agent.isStopped = false;
+                                m_rayCountalert = 0;
+                                _etat = Etat.patrol;
+                                
+                                Debug.Log("rien trouver je reprend la patrouille");
+                                isSearching = false;
+                            }
+                    }
                     break;
                 case Etat.targeting:
                     if (player != null)
@@ -82,23 +110,27 @@ namespace WalkEnemy.Runtime
             float halfAngle = viewAngle * 0.5f;
             Vector3 origin = rayOrigin.position;
             Vector3 forward = transform.forward;
-            
-            bool sendThisFrame = false;
+
+            int rayThatHitPlayer = 0;
+            bool alreadySwitchStat = false;
 
             for (int i = 0; i < rayCount; i++)
             {
                 float t = i / (float)(rayCount - 1);
                 float angle = Mathf.Lerp(-halfAngle, halfAngle, t);
-                Quaternion rotation = Quaternion.Euler(angle,angle,0);
+                Quaternion rotation = Quaternion.AngleAxis(angle,Vector3.up);
                 Vector3 dir = rotation * forward;
+                
+                int mask = playerMask | obstacleMask;
 
-                if (Physics.Raycast(origin, dir, out RaycastHit hitInfo, viewDistance , playerMask))
+                if (Physics.Raycast(origin, dir, out RaycastHit hitInfo, viewDistance , mask))
                 {
-                    if (!sendThisFrame)
+                    if (((1 << hitInfo.transform.gameObject.layer) & playerMask) != 0)
                     {
-                        rayCountalert++;
-                        targetpoint = hitInfo.transform;
-                        sendThisFrame = true;
+                        lastSeenPosition = hitInfo.point;
+                        rayThatHitPlayer++;
+                        m_rayCountalert++;
+                        isSearching = true;
                         _etat = Etat.search;
                         Debug.Log("detected");
                     }
@@ -108,6 +140,13 @@ namespace WalkEnemy.Runtime
                 {
                     Debug.DrawRay(origin, dir * viewDistance, Color.green);
                 }
+            }
+
+            m_rayCountalert = rayThatHitPlayer;
+
+            if (m_rayCountalert >= alert)
+            {
+                _etat = Etat.targeting;
             }
         }
         
@@ -125,6 +164,7 @@ namespace WalkEnemy.Runtime
         
         #region Privates
 
+        [SerializeField] private Collider zoneDetector;
         [SerializeField] private float viewAngle;
         [SerializeField] private float viewDistance;
         [SerializeField] private int rayCount;
@@ -134,13 +174,20 @@ namespace WalkEnemy.Runtime
         [SerializeField] private LayerMask playerMask;
         [SerializeField] private Transform rayOrigin;
         [SerializeField] private bool detected;
-        private int rayCountalert;
+        [SerializeField] private float waitTimeAfterSearch = 2f;
+        [SerializeField] private float lookAroundSpeed = 1.5f;
+        [SerializeField] private float lookAroundAngle = 60f;
+        
+        private float initialYRotation;
+        private float waitTimer = 0f;
+        private bool isWaiting = false;
         private NavMeshAgent _agent;
-        private int _counterView;
-        private int alert = 10;
+        private int alert;
         private int indexWaypoint = 0;
         private Transform targetpoint;
         private Etat _etat;
+        private Vector3 lastSeenPosition;
+        private bool isSearching = false;
 
         private enum Etat
         {
