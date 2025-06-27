@@ -35,6 +35,25 @@ namespace MovePlayer.Runtime
         public void MovePlayer(InputAction.CallbackContext context)
         {
             _moveDirection = context.ReadValue<Vector2>();
+            if (context.performed)
+            {
+                if (_moveDirection.y > 0)
+                {
+                  _animator.SetFloat("Speed", 0.4f);
+                  _animator.SetFloat("axez", 1);
+                }
+                else if (_moveDirection.y < 0)
+                {
+                     _animator.SetFloat("Speed", -0.4f);
+                     _animator.SetFloat("axez", -1);
+                }
+            }
+
+            if (context.canceled)
+            {
+                _animator.SetFloat("Speed", 0);
+                _animator.SetFloat("axez", 0);
+            }
         }
 
         public void MoveCamera(InputAction.CallbackContext context)
@@ -56,6 +75,7 @@ namespace MovePlayer.Runtime
         
         [SerializeField]private float moveSpeed = 5f;
         [Range(0, 100)] [SerializeField] private float _Sensibility;
+        [SerializeField] private Animator _animator;
         private float _moveDirCam;
         private Vector3 _moveDirection;
         private Rigidbody _rb;
