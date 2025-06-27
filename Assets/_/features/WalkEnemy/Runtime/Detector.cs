@@ -20,7 +20,7 @@ namespace WalkEnemy.Runtime
             if (((1 << other.gameObject.layer) & playerMask) != 0)
             {
                 scriptEnemy.m_visionActive = false;
-                scriptEnemy.m_rayCountalert = 0;
+                //scriptEnemy.m_rayCountalert = 0;
             }
         }
         

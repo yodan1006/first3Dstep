@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Serialization;
 using Color = UnityEngine.Color;
 
 namespace WalkEnemy.Runtime
@@ -23,7 +21,7 @@ namespace WalkEnemy.Runtime
         {
             _agent = GetComponent<NavMeshAgent>();
             _etat = Etat.patrol;
-            alert = rayCount /2;
+            alert = rayCount /10;
         }
 
         private void Update()
@@ -35,19 +33,19 @@ namespace WalkEnemy.Runtime
             {
                  case Etat.patrol: MovePatrol(); 
                      break;
-                case Etat.search:
+                 case Etat.search:
                     if (isSearching)
                     {
                         MoveToDetect(lastSeenPosition);
 
                         float distance = Vector3.Distance(transform.position, lastSeenPosition);
-                        if (distance < _agent.stoppingDistance + 0.2f && !isWaiting)
+                        if (distance < _agent.stoppingDistance + 0.2f)
                         {
                             isSearching = false;
                             isWaiting = true;
                             waitTimer = waitTimeAfterSearch;
-                            _agent.isStopped = true;
-                            m_rayCountalert = 0;
+                            //_agent.isStopped = true;
+                            //m_rayCountalert = 0;
                             initialYRotation = _agent.transform.rotation.eulerAngles.y;
                             Debug.Log("Joueur perdu, retour à la patrouille");
                         }
@@ -61,11 +59,11 @@ namespace WalkEnemy.Runtime
                             if (waitTimer <= 0)
                             {
                                 isWaiting = false;
-                                _agent.isStopped = false;
+                                //_agent.isStopped = false;
                                 m_rayCountalert = 0;
                                 _etat = Etat.patrol;
                                 
-                                Debug.Log("rien trouver je reprend la patrouille");
+                                Debug.Log("rien trouver");
                                 isSearching = false;
                             }
                     }
@@ -73,7 +71,7 @@ namespace WalkEnemy.Runtime
                 case Etat.targeting:
                     if (player != null)
                     {
-                        MoveEnemy(player);
+                        MoveEnemy();
                         Debug.Log("ALERT JOUEUR DETECTER je me deplace vers " + player);
                     }
                     break;
@@ -100,9 +98,9 @@ namespace WalkEnemy.Runtime
             _agent.destination = destination;
         }
 
-        private void MoveEnemy(GameObject target)
+        private void MoveEnemy()
         {
-            _agent.destination = target.transform.position;
+            _agent.destination = player.transform.position;
         }
 
         private void DetectPlayer()
@@ -129,7 +127,7 @@ namespace WalkEnemy.Runtime
                     {
                         lastSeenPosition = hitInfo.point;
                         rayThatHitPlayer++;
-                        m_rayCountalert++;
+                        //m_rayCountalert++;
                         isSearching = true;
                         _etat = Etat.search;
                         Debug.Log("detected");
@@ -140,14 +138,22 @@ namespace WalkEnemy.Runtime
                 {
                     Debug.DrawRay(origin, dir * viewDistance, Color.green);
                 }
+                m_rayCountalert = rayThatHitPlayer;
+
+                if (m_rayCountalert >= alert)
+                {
+                    _etat = Etat.targeting;
+                    isSearching = false;
+                    isWaiting = false;
+                }
+                else if (m_rayCountalert > 0)
+                {
+                    //lastSeenPosition = hitInfo.point;
+                    isSearching = true;
+                    _etat = Etat.search;
+                }
             }
 
-            m_rayCountalert = rayThatHitPlayer;
-
-            if (m_rayCountalert >= alert)
-            {
-                _etat = Etat.targeting;
-            }
         }
         
         
