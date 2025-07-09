@@ -1,0 +1,17 @@
+{
+    "name": "Ragdoll.Runtime",
+    "rootNamespace": "Ragdoll.Runtime",
+    "references": [
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:453b6da120bbe6c44a9e6595fbe023d0"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

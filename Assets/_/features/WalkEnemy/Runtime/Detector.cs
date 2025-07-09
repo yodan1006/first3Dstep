@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace WalkEnemy.Runtime
@@ -6,6 +7,18 @@ namespace WalkEnemy.Runtime
     {
         [SerializeField] private LayerMask playerMask;
         [SerializeField] private Patrouille scriptEnemy;
+        [SerializeField] private MeshCollider collider;
+
+
+        private void Awake()
+        {
+            collider = GetComponent<MeshCollider>();
+        }
+
+        private void Start()
+        {
+            collider.enabled = true;
+        }
 
         private void OnTriggerEnter(Collider other)
         {

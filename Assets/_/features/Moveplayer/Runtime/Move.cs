@@ -34,6 +34,11 @@ namespace MovePlayer.Runtime
 
         #region Utils
 
+
+        public void ChangeSensibility(float sensibility)
+        {
+            _Sensibility = sensibility;
+        }
         public void MovePlayer(InputAction.CallbackContext context)
         {
             _moveDirection = context.ReadValue<Vector2>();
@@ -89,6 +94,31 @@ namespace MovePlayer.Runtime
         {
             _moveDirCam = context.ReadValue<Vector2>().x;
         }
+        
+
+        public void Pause(InputAction.CallbackContext context)
+        {
+            if (!context.started) return;
+
+            _isPaused = !_isPaused;
+            
+            if (_isPaused)
+            {
+                Time.timeScale = 0;
+                pauseUI.SetActive(true);
+            }
+            else
+            {
+                Resume();
+            }
+        }
+
+        public void Resume()
+        {
+            _isPaused = false;
+            Time.timeScale = 1;
+            pauseUI.SetActive(false);
+        }
 
         #endregion
 
@@ -111,6 +141,8 @@ namespace MovePlayer.Runtime
         [SerializeField] private GameObject _GroundCheck;
         [SerializeField] private float _radiusCheck;
         [SerializeField] private LayerMask _groundLayer;
+        [SerializeField] private GameObject pauseUI;
+        private bool _isPaused;
         private float _moveDirCam;
         private Vector3 _moveDirection;
         private Rigidbody _rb;

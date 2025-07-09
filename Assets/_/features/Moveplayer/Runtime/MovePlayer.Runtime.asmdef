@@ -2,7 +2,8 @@
     "name": "MovePlayer.Runtime",
     "rootNamespace": "MovePlayer.Runtime",
     "references": [
-        "GUID:75469ad4d38634e559750d17036d5f7c"
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:aca5b16de6143c644909cabf74e635ce"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

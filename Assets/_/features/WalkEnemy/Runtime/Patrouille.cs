@@ -21,7 +21,8 @@ namespace WalkEnemy.Runtime
         {
             _agent = GetComponent<NavMeshAgent>();
             _etat = Etat.patrol;
-            alert = rayCount /10;
+            alert = rayCount /5;
+            _speedAlert = _agent.speed + 1;
         }
 
         private void Update()
@@ -47,7 +48,7 @@ namespace WalkEnemy.Runtime
                             //_agent.isStopped = true;
                             //m_rayCountalert = 0;
                             initialYRotation = _agent.transform.rotation.eulerAngles.y;
-                            Debug.Log("Joueur perdu, retour à la patrouille");
+                           // Debug.Log("Joueur perdu, retour à la patrouille");
                         }
                     }
                     else if (isWaiting)
@@ -63,7 +64,7 @@ namespace WalkEnemy.Runtime
                                 m_rayCountalert = 0;
                                 _etat = Etat.patrol;
                                 
-                                Debug.Log("rien trouver");
+                               // Debug.Log("rien trouver");
                                 isSearching = false;
                             }
                     }
@@ -72,7 +73,7 @@ namespace WalkEnemy.Runtime
                     if (player != null)
                     {
                         MoveEnemy();
-                        Debug.Log("ALERT JOUEUR DETECTER je me deplace vers " + player);
+                       // Debug.Log("ALERT JOUEUR DETECTER je me deplace vers " + player);
                     }
                     break;
             }
@@ -101,6 +102,8 @@ namespace WalkEnemy.Runtime
         private void MoveEnemy()
         {
             _agent.destination = player.transform.position;
+            _agent.speed = _speedAlert;
+            animator.SetBool("IsRunning",true);
         }
 
         private void DetectPlayer()
@@ -130,7 +133,7 @@ namespace WalkEnemy.Runtime
                         //m_rayCountalert++;
                         isSearching = true;
                         _etat = Etat.search;
-                        Debug.Log("detected");
+                        //Debug.Log("detected");
                     }
                     Debug.DrawLine(origin, hitInfo.point, Color.red);
                 }
@@ -183,7 +186,9 @@ namespace WalkEnemy.Runtime
         [SerializeField] private float waitTimeAfterSearch = 2f;
         [SerializeField] private float lookAroundSpeed = 1.5f;
         [SerializeField] private float lookAroundAngle = 60f;
-        
+        [SerializeField] private Patrouille thisPatrouille;
+        [SerializeField] private Detector detector;
+        [SerializeField] private Animator animator;
         private float initialYRotation;
         private float waitTimer = 0f;
         private bool isWaiting = false;
@@ -194,6 +199,7 @@ namespace WalkEnemy.Runtime
         private Etat _etat;
         private Vector3 lastSeenPosition;
         private bool isSearching = false;
+        private float _speedAlert;
 
         private enum Etat
         {
